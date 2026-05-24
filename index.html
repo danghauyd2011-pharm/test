@@ -11,7 +11,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=DM+Mono:ital,wght@0,400;0,500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
 <style>
 /* ════════════════════════════════════════════════════════
@@ -1217,9 +1217,7 @@ body {
 ════════════════════════════════════════════════ -->
 <div class="app-layout">
 <header class="topbar" id="topbar">
-  <button class="topbar-menu-toggle" id="topbar-menu-toggle" onclick="toggleMobileSidebar()" aria-label="Menu">
-    <span id="menu-icon">☰</span>
-  </button>
+  <button class="topbar-menu-toggle" id="topbar-menu-toggle" onclick="toggleMobileSidebar()" aria-label="Menu">☰</button>
   <div class="tb-logo kn" id="u-logo">💊</div>
   <div class="tb-title-wrap">
     <div class="tb-title" id="u-title">Kho Thuốc Gây Nghiện · Hướng Thần</div>
@@ -1758,30 +1756,27 @@ body {
 
 </main>
 
-<!-- ════════════════════
-   BOTTOM NAV (Mobile)
-════════════════════ -->
+<!-- ════════════ BOTTOM NAV (Mobile) ════════════ -->
 <nav class="bottom-nav" id="bottom-nav">
   <div class="bottom-nav-inner">
-    <button class="bnav-item active" id="bnav-kn-bbhv" onclick="mobileNavTo('kn','kn-bbhv')">
+    <button class="bnav-item active" onclick="mobileNavTo('kn','kn-bbhv')">
       <div class="bnav-icon-wrap">🔥</div>
       <span class="bnav-label">Huỷ Vỏ</span>
     </button>
-    <button class="bnav-item" id="bnav-kn-thekho" onclick="mobileNavTo('kn','kn-thekho')">
+    <button class="bnav-item" onclick="mobileNavTo('kn','kn-thekho')">
       <div class="bnav-icon-wrap">📦</div>
       <span class="bnav-label">Thẻ Kho</span>
     </button>
-    <button class="bnav-item" id="bnav-kn-tt20" onclick="mobileNavTo('kn','kn-tt20')">
+    <button class="bnav-item" onclick="mobileNavTo('kn','kn-tt20')">
       <div class="bnav-icon-wrap">📋</div>
       <span class="bnav-label">TT20</span>
     </button>
-    <button class="bnav-item px-mod" id="bnav-px-bckn" onclick="mobileNavTo('px','px-bckn')">
+    <button class="bnav-item px-mod" onclick="mobileNavTo('px','px-bckn')">
       <div class="bnav-icon-wrap">☢️</div>
       <span class="bnav-label">Phóng Xạ</span>
     </button>
   </div>
 </nav>
-
 </div><!-- /app-body -->
 </div><!-- /app-layout -->
 </div><!-- /zoom-root -->
@@ -3074,71 +3069,6 @@ function pxInitDZ(){
 // ════════════════════════════════════════════════════════
 // INIT ALL
 // ════════════════════════════════════════════════════════
-// ════════════════════════════════════════════════════════
-// MOBILE NAVIGATION HELPERS
-// ════════════════════════════════════════════════════════
-function toggleMobileSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  const overlay = document.getElementById('sidebar-overlay');
-  const icon    = document.getElementById('menu-icon');
-  const isOpen  = sidebar.classList.contains('mobile-open');
-  if (isOpen) {
-    sidebar.classList.remove('mobile-open');
-    overlay.classList.remove('visible');
-    icon.textContent = '☰';
-  } else {
-    sidebar.classList.add('mobile-open');
-    overlay.classList.add('visible');
-    icon.textContent = '✕';
-  }
-}
-
-function closeMobileSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  const overlay = document.getElementById('sidebar-overlay');
-  const icon    = document.getElementById('menu-icon');
-  sidebar.classList.remove('mobile-open');
-  overlay.classList.remove('visible');
-  if (icon) icon.textContent = '☰';
-}
-
-function mobileNavTo(mod, sub) {
-  // Update bottom nav active state
-  document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('active'));
-  const btn = document.getElementById('bnav-' + mod + '-' + (sub ? sub.replace(mod+'-','') : ''));
-  if (btn) btn.classList.add('active');
-  // Navigate
-  if (mod !== currentMod) switchModule(mod);
-  if (sub) {
-    if (mod === 'kn') switchSubKN(sub);
-    else if (mod === 'px') switchSubPX(sub);
-  }
-  closeMobileSidebar();
-  window.scrollTo(0,0);
-}
-
-// Patch switchSubKN/switchModule to close sidebar & update bottom nav
-const _origSwitchSubKN = switchSubKN;
-switchSubKN = function(sub) {
-  _origSwitchSubKN(sub);
-  closeMobileSidebar();
-  document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('active'));
-  const id = 'bnav-kn-' + sub.replace('kn-','');
-  const el = document.getElementById(id);
-  if (el) el.classList.add('active');
-};
-
-const _origSwitchModule = switchModule;
-switchModule = function(mod) {
-  _origSwitchModule(mod);
-  closeMobileSidebar();
-  document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('active'));
-  if (mod === 'px') {
-    const el = document.getElementById('bnav-px-bckn');
-    if (el) el.classList.add('active');
-  }
-};
-
 document.addEventListener('DOMContentLoaded',()=>{
   // Zoom
   const saved=parseFloat(localStorage.getItem('layout-zoom')||'1');applyZoom(saved||1);
@@ -3172,6 +3102,55 @@ document.addEventListener('DOMContentLoaded',()=>{
   // Scale A4 on resize
   window.addEventListener('resize',()=>setTimeout(()=>{scaleAllA4();pxScaleDoc();},100));
   setTimeout(()=>{scaleAllA4();pxScaleDoc();},300);
+});
+</script>
+
+<script>
+// ════════════════════════════════════════════════════════
+// MOBILE NAVIGATION HELPERS (added in v2 — do NOT modify scripts above)
+// ════════════════════════════════════════════════════════
+function toggleMobileSidebar() {
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('sidebar-overlay');
+  var btn     = document.getElementById('topbar-menu-toggle');
+  var isOpen  = sidebar.classList.contains('mobile-open');
+  if (isOpen) {
+    sidebar.classList.remove('mobile-open');
+    overlay.classList.remove('visible');
+    if (btn) btn.textContent = '☰';
+  } else {
+    sidebar.classList.add('mobile-open');
+    overlay.classList.add('visible');
+    if (btn) btn.textContent = '✕';
+  }
+}
+function closeMobileSidebar() {
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('sidebar-overlay');
+  var btn     = document.getElementById('topbar-menu-toggle');
+  if (sidebar) sidebar.classList.remove('mobile-open');
+  if (overlay) overlay.classList.remove('visible');
+  if (btn) btn.textContent = '☰';
+}
+function mobileNavTo(mod, sub) {
+  document.querySelectorAll('.bnav-item').forEach(function(b){ b.classList.remove('active'); });
+  if (event && event.currentTarget) event.currentTarget.classList.add('active');
+  if (mod === 'kn') {
+    if (typeof currentMod !== 'undefined' && currentMod !== 'kn' && typeof switchModule === 'function') switchModule('kn');
+    if (sub && typeof switchSubKN === 'function') switchSubKN(sub);
+  } else if (mod === 'px') {
+    if (typeof currentMod !== 'undefined' && currentMod !== 'px' && typeof switchModule === 'function') switchModule('px');
+    if (sub && typeof switchSubPX === 'function') switchSubPX(sub);
+  }
+  closeMobileSidebar();
+  window.scrollTo(0, 0);
+}
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.sb-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      if (window.innerWidth <= 768) setTimeout(closeMobileSidebar, 80);
+    });
+  });
 });
 </script>
 </body>
