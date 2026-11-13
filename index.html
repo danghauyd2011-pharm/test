@@ -1253,6 +1253,25 @@ body.pb-mode .dnav-btn.active{border-left-color:#ffbb00}
 .cc-host tbody tr:nth-child(even):where(:not(:hover)) td{background:#f6f8fc}
 .cc-host th.cc-s{cursor:pointer;user-select:none}
 .cc-host th[data-sd="asc"]:after{content:" ▲";font-size:9px}.cc-host th[data-sd="desc"]:after{content:" ▼";font-size:9px}
+
+/* ═══ Trang chủ ═══ */
+#home{position:fixed;left:0;right:0;bottom:0;top:var(--topbar-h);z-index:200;background:var(--bg,#f1f4f9);overflow-y:auto;display:none}
+#home.on{display:block}
+#home-btn{width:40px;height:40px;background:var(--s2);border:1.5px solid var(--border);border-radius:10px;cursor:pointer;font-size:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+body.home-open #home-btn{display:none}
+.hm-wrap{max-width:980px;margin:0 auto;padding:16px 14px 40px}
+.hm-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.hm-h{font-size:19px;font-weight:800;color:#0f2438}.hm-s{font-size:12.5px;color:var(--t2)}
+.hm-q{max-width:240px;height:36px!important}
+.hm-sec{font-size:11.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#64748b;margin:16px 2px 8px}
+.hm-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.hm-t{background:#fff;border:1px solid #e3e8f0;border-radius:16px;padding:14px;cursor:pointer;display:flex;flex-direction:column;gap:6px;box-shadow:0 2px 10px rgba(15,36,56,.05);text-align:left;font-family:inherit;transition:transform .12s,box-shadow .12s;min-height:122px;-webkit-tap-highlight-color:transparent}
+.hm-t:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(15,36,56,.12)}.hm-t:active{transform:scale(.97)}
+.hm-i{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font-size:24px}
+.hm-n{font-size:14.5px;font-weight:800;color:#0f2438;line-height:1.2}.hm-d{font-size:11.5px;color:#64748b;line-height:1.3}
+.hm-b{align-self:flex-start;font-size:11.5px;font-weight:800;padding:2px 9px;border-radius:99px;background:#dcfce7;color:#166534}.hm-b.w{background:#fef3c7;color:#92400e}
+.hm-f{background:#fff;border:1px solid #e3e8f0;border-radius:12px;padding:8px 12px;font-size:12px;color:#475569;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.hm-f button{border:0;background:none;color:#dc2626;font:700 12px inherit;cursor:pointer;margin-left:auto}
 </style>
 </head>
 <body>
@@ -1359,6 +1378,7 @@ body.pb-mode .dnav-btn.active{border-left-color:#ffbb00}
     <span class="ham-line"></span>
     <span class="ham-line"></span>
   </button>
+  <button id="home-btn" onclick="homeShow()" aria-label="Trang chủ" title="Trang chủ">🏠</button>
   <div class="tb-logo tbl-1" id="u-logo">💊</div>
   <div class="tb-title-wrap">
     <div class="tb-title" id="u-title">Biên Bản Huỷ Vỏ</div>
@@ -1373,6 +1393,16 @@ body.pb-mode .dnav-btn.active{border-left-color:#ffbb00}
     <div class="tb-badge" id="u-badge" style="background:var(--c1l);color:var(--c1)">BBHV</div>
   </div>
 </header>
+
+<!-- ═══ TRANG CHỦ ═══ -->
+<div id="home" class="on">
+  <div class="hm-wrap">
+    <div class="hm-top"><div><div class="hm-h">Biên Bản Huỷ Vỏ · Kho Dược</div><div class="hm-s">Bệnh viện Đà Nẵng · chạm vào chức năng để mở</div></div>
+      <input class="input hm-q" id="hm-q" placeholder="🔍 Tìm chức năng…" oninput="home_render()" autocomplete="off"></div>
+    <div id="hm-files"></div>
+    <div id="hm-grid"></div>
+  </div>
+</div>
 
 <!-- ═══ APP SHELL ═══ -->
 <div class="app-shell">
@@ -2232,6 +2262,27 @@ body.pb-mode .dnav-btn.active{border-left-color:#ffbb00}
         <textarea class="input cfg-textarea" id="cfg-bbhv-nhap-bb" rows="2" style="resize:vertical;line-height:1.8;font-size:13px"></textarea>
         <div class="upload-hint">Mặc định: Trả thuốc theo yêu cầu</div>
       </div>
+    </div>
+  </div>
+
+  <!-- ═══ Kết nối Google Sheet + dữ liệu đã nhớ ═══ -->
+  <div class="card">
+    <div class="card-hdr"><div class="c-title">☁️ Kết nối Google Sheet (nhập một lần)</div></div>
+    <div style="padding:12px 14px;display:flex;flex-direction:column;gap:8px">
+      <div style="font-size:12px;color:var(--t2)">Mỗi chức năng dùng một Apps Script riêng nên có hai URL. Nhập tại đây, không cần mở từng tab.</div>
+      <b style="font-size:13px">📈 Theo dõi phân bổ</b>
+      <input class="input" id="ss-pb-url" placeholder="URL Web App (/exec)" autocomplete="off"><input class="input" id="ss-pb-tok" type="password" placeholder="Mật khẩu" autocomplete="off">
+      <b style="font-size:13px">✅ Nộp BB Seduxen</b>
+      <input class="input" id="ss-sd-url" placeholder="URL Web App (/exec)" autocomplete="off"><input class="input" id="ss-sd-tok" type="password" placeholder="Mật khẩu" autocomplete="off">
+      <button class="btn btn-primary" onclick="ss_save()">Lưu kết nối</button>
+      <div id="ss-msg" style="font-size:12.5px;font-weight:600"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><div class="c-title">💾 File đã nhớ trên máy này</div></div>
+    <div style="padding:12px 14px;display:flex;flex-direction:column;gap:8px">
+      <div id="ss-files" style="font-size:12.5px"></div>
+      <button class="btn btn-ghost" onclick="fsClearAll()">Xóa file đã nhớ</button>
     </div>
   </div>
 
@@ -3430,7 +3481,7 @@ function processAll() {
       // ── Nếu auto-process: chuyển sang tab Biên Bản và chọn tất cả ngày ──
       if (_autoProcess) {
         _autoProcess = false;
-        setTimeout(() => {
+        if (!window._fsRestoring) setTimeout(() => {
           switchTab('tab-bien-ban');
           setTimeout(selectAllDates, 80);
           window.scrollTo(0, 0);
@@ -4409,6 +4460,7 @@ function sed_processAll() {
       sed_renderTable();
       sed_renderA4Preview();
       document.getElementById('sed-result-section').classList.remove('hidden');
+      if (typeof sdb_autoSeed === 'function') sdb_autoSeed();
 
     } catch (err) {
       sed_showError('Lỗi xử lý: ' + err.message);
@@ -7025,21 +7077,31 @@ async function sdb_load() {
     const d = await sdbApi('load');
     const keep = Object.values(SDB.rows).filter(r => r.dirty); SDB.rows = {};
     (d.rows || []).forEach(r => { SDB.rows[sdbK(r.month, r.dept)] = { month: r.month, dept: r.dept, xuat: +r.xuat || 0, tra: +r.tra || 0, vo: +r.vo || 0, nop: !!r.nop, date: r.date || '', note: r.note || '', saved: true, dirty: false }; });
-    keep.forEach(r => { SDB.rows[sdbK(r.month, r.dept)] = r; });
-    SDB.err = ''; return true;
-  } catch (e) { SDB.err = e.message; return false; }
+    keep.forEach(r => { const k = sdbK(r.month, r.dept), o = SDB.rows[k]; if (o) { if (o.xuat !== r.xuat || o.tra !== r.tra || o.vo !== r.vo) { o.xuat = r.xuat; o.tra = r.tra; o.vo = r.vo; o.dirty = true; } } else SDB.rows[k] = r; });
+    SDB.err = ''; SDB.synced = true; return true;
+  } catch (e) { SDB.err = e.message; SDB.synced = false; return false; }
   finally { SDB.saving--; sdb_render(); }
 }
 function sdb_onOpen() {
-  const m = document.getElementById('sed-month') && document.getElementById('sed-month').value;
-  if (!SDB.month) SDB.month = m || sdbToday().slice(0, 7);
+  if (!SDB.month) { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - 1); SDB.month = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); }
   document.getElementById('sdb-month').value = SDB.month;
-  sdb_seed(false); sdb_render();
-  if (sdbCfg().url && !SDB.loadedOnce) { SDB.loadedOnce = true; sdb_load().then(() => { sdb_pickDefault(); sdb_seed(false); sdb_render(); }); }
-  else if (!sdbCfg().url) { sdb_toggleCfg(true); }
+  sdb_autoSeed();
+  if (!sdbCfg().url) sdb_toggleCfg(true);
+}
+// Tự lấy số liệu từ tab Vỏ Seduxen, tự tải Sheet, tự lưu dòng mới (nếu đã đồng bộ)
+function sdb_autoSeed() {
+  const sm = document.getElementById('sed-month');
+  if (!SDB.picked && sm && sm.value && typeof sedFilterMode !== 'undefined' && sedFilterMode !== 'range') { SDB.month = sm.value; const mi = document.getElementById('sdb-month'); if (mi) mi.value = SDB.month; }
+  const go = () => {
+    sdb_seed(false); sdb_render();
+    if (SDB.synced) { const d = Object.values(SDB.rows).filter(r => r.dirty && r.month === SDB.month); if (d.length) sdb_queue(d); }
+    if (typeof home_render === 'function') home_render();
+  };
+  if (sdbCfg().url && !SDB.loadedOnce) { SDB.loadedOnce = true; sdb_load().then(go); } else go();
 }
 function sdb_pickDefault() {
   if (SDB.picked) return;
+  const _sm = document.getElementById('sed-month'); if (_sm && _sm.value) return;
   const ms = [...new Set(Object.values(SDB.rows).map(r => r.month))].sort();
   if (ms.length && !ms.includes(SDB.month)) { SDB.month = ms[ms.length - 1]; document.getElementById('sdb-month').value = SDB.month; }
 }
@@ -7198,6 +7260,102 @@ setTimeout(() => {
   const sed = document.getElementById('sed-preview-table'); if (sed) colCtl(sed.closest('.table-wrap'), 'sed', { sort: true });
   colCtl(document.getElementById('pb-list'), 'pb');
 }, 0);
+
+/* ═══ Lưu file đã nạp (IndexedDB) ═══ */
+const FS = { restoring: false };
+function fsOpen() { return new Promise(res => { try { const r = indexedDB.open('bbhv_files', 1); r.onupgradeneeded = () => r.result.createObjectStore('f'); r.onsuccess = () => res(r.result); r.onerror = () => res(null); } catch (e) { res(null); } }); }
+async function fsPut(key, files) {
+  try {
+    const arr = Array.from(files || []).filter(Boolean); if (!arr.length) return;
+    const items = await Promise.all(arr.map(async f => ({ name: f.name, type: f.type, buf: await f.arrayBuffer() })));
+    const db = await fsOpen(); if (!db) return;
+    db.transaction('f', 'readwrite').objectStore('f').put({ items, t: Date.now() }, key);
+  } catch (e) {}
+}
+async function fsGet(key) { const db = await fsOpen(); if (!db) return null; return new Promise(res => { const r = db.transaction('f').objectStore('f').get(key); r.onsuccess = () => res(r.result || null); r.onerror = () => res(null); }); }
+async function fsClearAll() { const db = await fsOpen(); if (db) db.transaction('f', 'readwrite').objectStore('f').clear(); setTimeout(() => location.reload(), 300); }
+const FS_LABEL = { bb_export: 'File Xuất kho', bb_import: 'File Nhập/Trả', tk_ton: 'File Tồn' };
+async function fsMeta() { const out = []; for (const k of Object.keys(FS_LABEL)) { const r = await fsGet(k); if (r) out.push({ key: k, label: FS_LABEL[k], names: r.items.map(i => i.name).join(', '), t: r.t }); } return out; }
+(function () {
+  const wrap = (name, keyOf) => { const o = window[name]; if (typeof o !== 'function') return; window[name] = function (f, t) { if (!FS.restoring) { const k = keyOf(t); if (k) fsPut(k, f && f.length !== undefined && !(f instanceof File) ? f : [f]); } return o.apply(this, arguments); }; };
+  wrap('bbhv_loadFile', t => t === 'export' ? 'bb_export' : t === 'import' ? 'bb_import' : '');
+  wrap('sed_loadFile', t => t === 'export' ? 'bb_export' : t === 'import' ? 'bb_import' : '');
+  wrap('loadWB', t => t === 'xuat' ? 'bb_export' : t === 'nhap' ? 'bb_import' : t === 'ton' ? 'tk_ton' : '');
+})();
+async function fsRestore() {
+  const ex = await fsGet('bb_export'), im = await fsGet('bb_import'), tn = await fsGet('tk_ton');
+  if (!ex && !im && !tn) { home_render(); return; }
+  FS.restoring = true; window._fsRestoring = true;
+  const mk = r => r.items.map(i => new File([i.buf], i.name, { type: i.type }));
+  if (ex) bbhv_loadFile(mk(ex), 'export');
+  if (im) setTimeout(() => bbhv_loadFile(mk(im), 'import'), 500);
+  if (tn) setTimeout(() => loadWB(mk(tn)[0], 'ton'), 1100);
+  setTimeout(() => { FS.restoring = false; window._fsRestoring = false; home_render(); }, 7000);
+}
+
+/* ═══ Cài đặt: kết nối Sheet + file đã nhớ ═══ */
+function ss_render() {
+  const g = k => localStorage.getItem(k) || '';
+  document.getElementById('ss-pb-url').value = g('pb_cloud_url'); document.getElementById('ss-pb-tok').value = g('pb_cloud_token');
+  document.getElementById('ss-sd-url').value = g('sdb_url'); document.getElementById('ss-sd-tok').value = g('sdb_token');
+  fsMeta().then(m => { document.getElementById('ss-files').innerHTML = m.length ? m.map(x => '<div>• <b>' + x.label + ':</b> ' + sdbE(x.names) + ' <span style="color:#64748b">(' + new Date(x.t).toLocaleString('vi-VN') + ')</span></div>').join('') : 'Chưa nhớ file nào.'; });
+}
+function ss_save() {
+  const v = id => document.getElementById(id).value.trim();
+  localStorage.setItem('pb_cloud_url', v('ss-pb-url')); localStorage.setItem('pb_cloud_token', v('ss-pb-tok'));
+  localStorage.setItem('sdb_url', v('ss-sd-url')); localStorage.setItem('sdb_token', v('ss-sd-tok'));
+  SDB.loadedOnce = false; SDB.synced = false;
+  const m = document.getElementById('ss-msg'); m.style.color = '#15803d'; m.textContent = 'Đã lưu. Mở lại tab Phân bổ / Nộp BB là tự tải dữ liệu.';
+}
+
+/* ═══ Trang chủ ═══ */
+const HOME = [
+  { sec: 'Huỷ vỏ', bg: '#ffedd5', items: [
+    { ic: '📋', t: 'Sổ Trả Vỏ', d: 'Lập sổ trả vỏ từ file xuất / nhập', go: () => { switchApp(1); switchTab('tab-so-tra'); } },
+    { ic: '📄', t: 'Biên Bản', d: 'Biên bản hủy vỏ theo ngày', go: () => { switchApp(1); switchTab('tab-bien-ban'); } },
+    { ic: '🔢', t: 'Đếm Vỏ Seduxen', d: 'Xuất – Trả – Vỏ theo khoa', go: () => { switchApp(1); switchTab('tab-seduxen'); } },
+    { ic: '✅', t: 'Nộp BB Seduxen', d: 'Checklist khoa đã nộp biên bản', live: 'nopbb', go: () => { switchApp(1); switchTab('tab-sedbb'); } } ] },
+  { sec: 'Thẻ kho', bg: '#dbeafe', items: [
+    { ic: '📁', t: 'Nhập dữ liệu kho', d: 'Nạp file xuất, nhập, tồn', go: () => { switchApp(2); goScreen('sc-data'); } },
+    { ic: '📊', t: 'Thẻ kho', d: 'Xem, in thẻ kho theo mã', go: () => { switchApp(2); goScreen('sc-the-kho'); } },
+    { ic: '📝', t: 'Kiểm kê', d: 'Biên bản kiểm kê', go: () => { switchApp(2); goScreen('sc-bbkk'); if (typeof renderBBKK === 'function') renderBBKK(); } } ] },
+  { sec: 'Khác', bg: '#ede9fe', items: [
+    { ic: '📈', t: 'Theo dõi phân bổ', d: 'Phân bổ và nhập kho theo thầu', go: () => switchApp(5) },
+    { ic: '🏥', t: 'Thông tư 20', d: 'Điền STT TT20/2022', go: () => switchApp(3) },
+    { ic: '⚙️', t: 'Cài đặt', d: 'Kết nối Sheet, thuốc chuẩn, chứng từ', go: () => switchApp(4) } ] },
+];
+function homeShow() {
+  if (history.state && history.state.app) { history.back(); return; }
+  document.getElementById('home').classList.add('on'); document.body.classList.add('home-open'); home_render();
+}
+function homeHide(push) {
+  const h = document.getElementById('home'); if (!h.classList.contains('on')) return;
+  h.classList.remove('on'); document.body.classList.remove('home-open');
+  if (push) history.pushState({ app: 1 }, '', '#app');
+}
+function homeGo(i, j) { homeHide(true); HOME[i].items[j].go(); window.scrollTo(0, 0); }
+window.addEventListener('popstate', e => { if (!(e.state && e.state.app)) { document.getElementById('home').classList.add('on'); document.body.classList.add('home-open'); home_render(); } });
+['switchApp', 'switchTab', 'goScreen'].forEach(n => { const o = window[n]; window[n] = function () { if (!FS.restoring) homeHide(true); const r = o.apply(this, arguments); if (n === 'switchApp' && arguments[0] === 4) ss_render(); return r; }; });
+function home_render() {
+  const g = document.getElementById('hm-grid'); if (!g) return;
+  const q = (document.getElementById('hm-q').value || '').trim().toLowerCase();
+  let h = '';
+  HOME.forEach((s, i) => {
+    const its = s.items.map((it, j) => [it, j]).filter(([it]) => !q || (it.t + ' ' + it.d).toLowerCase().includes(q));
+    if (!its.length) return;
+    h += '<div class="hm-sec">' + s.sec + '</div><div class="hm-g">' + its.map(([it, j]) => {
+      let live = '';
+      if (it.live === 'nopbb' && typeof SDB !== 'undefined') { const r = Object.values(SDB.rows).filter(x => x.month === SDB.month); if (r.length) { const d = r.filter(x => x.nop).length; live = '<span class="hm-b' + (d < r.length ? ' w' : '') + '">' + d + '/' + r.length + ' khoa đã nộp</span>'; } }
+      return '<button class="hm-t" onclick="homeGo(' + i + ',' + j + ')"><span class="hm-i" style="background:' + s.bg + '">' + it.ic + '</span><span class="hm-n">' + it.t + '</span><span class="hm-d">' + it.d + '</span>' + live + '</button>';
+    }).join('') + '</div>';
+  });
+  g.innerHTML = h || '<div class="hm-d" style="padding:20px">Không có chức năng nào khớp.</div>';
+  fsMeta().then(m => { const f = document.getElementById('hm-files'); f.innerHTML = m.length ? '<div class="hm-f">💾 Đã nhớ file lần trước: ' + m.map(x => '<b>' + x.label + '</b>').join(' · ') + '<button onclick="fsClearAll()">Xóa</button></div>' : ''; });
+}
+document.body.classList.add('home-open');
+history.replaceState(null, '', location.pathname + location.search);
+home_render();
+window.addEventListener('load', () => { setTimeout(fsRestore, 300); });
 </script>
 </body>
 </html>
