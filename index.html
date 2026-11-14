@@ -1272,6 +1272,23 @@ body.home-open #home-btn{display:none}
 .hm-b{align-self:flex-start;font-size:11.5px;font-weight:800;padding:2px 9px;border-radius:99px;background:#dcfce7;color:#166534}.hm-b.w{background:#fef3c7;color:#92400e}
 .hm-f{background:#fff;border:1px solid #e3e8f0;border-radius:12px;padding:8px 12px;font-size:12px;color:#475569;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .hm-f button{border:0;background:none;color:#dc2626;font:700 12px inherit;cursor:pointer;margin-left:auto}
+
+/* Trang chủ: tự co theo màn hình (cột + chiều cao ô do JS tính) */
+body.home-open #bbhv-inner-nav{display:none!important}
+#home .hm-wrap{padding:10px 12px 14px}
+#home .hm-top{margin-bottom:4px;flex-wrap:nowrap}
+#home .hm-q{flex:1;min-width:0;max-width:260px;height:34px!important}
+#home .hm-sec{margin:8px 2px 5px}
+#home .hm-g{grid-template-columns:repeat(var(--hm-c,2),minmax(0,1fr));gap:8px}
+#home .hm-t{min-height:var(--hm-th,64px);height:var(--hm-th,auto);justify-content:center}
+#home .hm-x{display:flex;flex-direction:column;gap:2px;min-width:0}
+#home.cp .hm-s{display:none}
+#home.cp .hm-h{font-size:16px}
+#home.cp .hm-t{flex-direction:row;align-items:center;gap:10px;padding:6px 10px;border-radius:14px}
+#home.cp .hm-i{width:38px;height:38px;font-size:20px;border-radius:11px;flex:none}
+#home.cp .hm-n{font-size:13.5px}
+#home.cp .hm-d{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#home.cp .hm-b{font-size:10.5px;padding:1px 7px}
 </style>
 </head>
 <body>
@@ -7346,12 +7363,25 @@ function home_render() {
     h += '<div class="hm-sec">' + s.sec + '</div><div class="hm-g">' + its.map(([it, j]) => {
       let live = '';
       if (it.live === 'nopbb' && typeof SDB !== 'undefined') { const r = Object.values(SDB.rows).filter(x => x.month === SDB.month); if (r.length) { const d = r.filter(x => x.nop).length; live = '<span class="hm-b' + (d < r.length ? ' w' : '') + '">' + d + '/' + r.length + ' khoa đã nộp</span>'; } }
-      return '<button class="hm-t" onclick="homeGo(' + i + ',' + j + ')"><span class="hm-i" style="background:' + s.bg + '">' + it.ic + '</span><span class="hm-n">' + it.t + '</span><span class="hm-d">' + it.d + '</span>' + live + '</button>';
+      return '<button class="hm-t" onclick="homeGo(' + i + ',' + j + ')"><span class="hm-i" style="background:' + s.bg + '">' + it.ic + '</span><span class="hm-x"><span class="hm-n">' + it.t + '</span><span class="hm-d">' + it.d + '</span>' + live + '</span></button>';
     }).join('') + '</div>';
   });
   g.innerHTML = h || '<div class="hm-d" style="padding:20px">Không có chức năng nào khớp.</div>';
-  fsMeta().then(m => { const f = document.getElementById('hm-files'); f.innerHTML = m.length ? '<div class="hm-f">💾 Đã nhớ file lần trước: ' + m.map(x => '<b>' + x.label + '</b>').join(' · ') + '<button onclick="fsClearAll()">Xóa</button></div>' : ''; });
+  fsMeta().then(m => { const f = document.getElementById('hm-files'); f.innerHTML = m.length ? '<div class="hm-f">💾 Đã nhớ file lần trước: ' + m.map(x => '<b>' + x.label + '</b>').join(' · ') + '<button onclick="fsClearAll()">Xóa</button></div>' : ''; home_fit(); });
+  home_fit();
 }
+function home_fit() {
+  const h = document.getElementById('home'); if (!h || !h.classList.contains('on')) return;
+  const W = h.querySelector('.hm-wrap').clientWidth - 24;
+  const cols = Math.max(2, Math.min(5, Math.floor((W + 8) / 158)));
+  const secs = [...h.querySelectorAll('.hm-g')].map(g => g.children.length);
+  const rows = secs.reduce((a, n) => a + Math.ceil(n / cols), 0);
+  const fixed = h.querySelector('.hm-top').offsetHeight + h.querySelector('#hm-files').offsetHeight + secs.length * 32 + 30 + rows * 8;
+  const th = Math.max(54, Math.min(130, Math.floor((h.clientHeight - fixed) / Math.max(rows, 1))));
+  h.style.setProperty('--hm-c', cols); h.style.setProperty('--hm-th', th + 'px'); h.classList.toggle('cp', th < 96);
+}
+['resize', 'orientationchange'].forEach(ev => window.addEventListener(ev, () => setTimeout(home_fit, 60)));
+if (window.visualViewport) window.visualViewport.addEventListener('resize', () => setTimeout(home_fit, 60));
 document.body.classList.add('home-open');
 history.replaceState(null, '', location.pathname + location.search);
 home_render();
