@@ -1308,6 +1308,18 @@ body.home-open #bbhv-inner-nav{display:none!important}
 .shv-t td.nm{white-space:normal;min-width:150px;font-weight:600;color:#1e3a8a}
 .shv-pos{color:#15803d;font-weight:800}.shv-neg{color:#dc2626;font-weight:800}.shv-new{color:#b45309;font-weight:700}
 .shv-m{padding:14px;text-align:center;color:#64748b;font-size:13px}
+
+.ung-sum{display:flex;gap:18px;flex-wrap:wrap;padding:6px 4px}
+.ung-sum div{display:flex;flex-direction:column;line-height:1.15}.ung-sum b{font-size:21px;font-weight:800;font-variant-numeric:tabular-nums}.ung-sum span{font-size:11.5px;color:#475569;font-weight:600}
+.ung-r{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.ung-w{max-height:62vh;overflow:auto;border:1px solid #dfe5ee;border-radius:10px;background:#fff}
+.ung-t{border-collapse:collapse;width:100%;font-size:12.5px}
+.ung-t th{position:sticky;top:0;z-index:2;background:#1e3a8a;color:#fff;padding:6px 8px;text-align:right;white-space:nowrap}.ung-t th:first-child{text-align:left}
+.ung-t td{padding:5px 8px;border-top:1px solid #eef1f6;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}.ung-t td:first-child{text-align:left;white-space:normal}
+.ung-g td{background:#eef4ff;font-weight:800;color:#0f2438;cursor:pointer;border-top:1px solid #d5e0f2}
+.ung-c{cursor:pointer}.ung-c:hover td{background:#f4f8ff}.ung-c td:first-child{padding-left:22px;color:#334155}
+.ung-c small{color:#64748b;font-weight:500}
+.ung-pos{color:#1d4ed8;font-weight:800}.ung-neg{color:#dc2626;font-weight:800}.ung-zero{color:#94a3b8}
 </style>
 </head>
 <body>
@@ -2109,6 +2121,37 @@ body.home-open #bbhv-inner-nav{display:none!important}
   </div>
 
   <!-- ════ BIÊN BẢN KIỂM KÊ CUỐI THÁNG ════ -->
+  <div id="sc-ung" class="screen">
+    <div style="display:flex;align-items:center;gap:10px;padding:4px 0 0">
+      <button class="btn btn-ghost btn-sm" onclick="goScreen('sc-the-kho')">← Quay lại</button>
+      <b style="font-size:15px">📦 Ứng thuốc tủ trực</b>
+    </div>
+    <div id="ung-sum" class="ung-sum"></div>
+    <div class="card" style="padding:10px 12px;display:flex;flex-direction:column;gap:8px">
+      <div class="ung-r">
+        <input class="input" id="ung-q" placeholder="🔍 Tìm khoa, mã, tên thuốc…" oninput="UNG.q=this.value.trim().toLowerCase();ung_render()" autocomplete="off" style="flex:1;min-width:140px;height:34px">
+        <div class="seg" id="ung-mode"></div>
+      </div>
+      <div class="ung-r">
+        <div class="seg" id="ung-f"></div>
+        <span style="flex:1"></span>
+        <button class="btn btn-sm btn-ghost" onclick="ung_cfgOpen()">⚙ Sheet</button>
+        <button class="btn btn-sm btn-primary" onclick="ung_save()">☁️ Lưu Sheet</button>
+        <button class="btn btn-sm btn-ghost" onclick="ung_print()">🖨 In</button><button class="btn btn-sm btn-ghost" onclick="ung_excel()">Excel</button>
+      </div>
+      <div class="ung-r"><span style="font-size:12.5px;font-weight:700;color:#475569">Tồn ứng đầu kỳ:</span>
+        <select id="ung-open" class="input" style="flex:1;min-width:150px;height:32px;font-size:12.5px" onchange="ung_setOpen(this.value)"><option value="">Không — tính từ file</option></select>
+        <button class="btn btn-sm btn-ghost" onclick="ung_loadAsofs(true)">🔄</button></div>
+      <div id="ung-msg" style="font-size:12.5px;font-weight:600"></div>
+      <div id="ung-list" class="ung-w"></div>
+    </div>
+    <div id="ung-pop" class="sdb-pop"><div class="box" style="max-height:80vh"><b id="ung-pop-t"></b><div id="ung-pop-b" style="overflow:auto;max-height:55vh"></div><button class="btn btn-sm btn-ghost" onclick="document.getElementById('ung-pop').classList.remove('on')">Đóng</button></div></div>
+    <div id="ung-cfg" class="sdb-pop"><div class="box"><b>Kết nối Google Sheet — Ứng tủ trực</b>
+      <input class="input" id="ung-url" placeholder="URL Web App (/exec)" autocomplete="off"><input class="input" id="ung-tok" type="password" placeholder="Mật khẩu" autocomplete="off">
+      <div style="display:flex;gap:8px"><button class="btn btn-sm btn-ghost" style="flex:1" onclick="ung_cfgTest()">Kiểm tra</button><button class="btn btn-sm btn-primary" style="flex:1" onclick="ung_cfgSave()">Lưu</button></div>
+      <div id="ung-cfg-msg" class="sdb-msg"></div><button class="btn btn-sm btn-ghost" onclick="document.getElementById('ung-cfg').classList.remove('on')">Đóng</button></div></div>
+  </div>
+
   <div id="sc-bbkk" class="screen">
 
     <div style="display:flex;align-items:center;gap:10px;padding:4px 0 0">
@@ -2310,6 +2353,8 @@ body.home-open #bbhv-inner-nav{display:none!important}
       <input class="input" id="ss-pb-url" placeholder="URL Web App (/exec)" autocomplete="off"><input class="input" id="ss-pb-tok" type="password" placeholder="Mật khẩu" autocomplete="off">
       <b style="font-size:13px">✅ Nộp BB Seduxen</b>
       <input class="input" id="ss-sd-url" placeholder="URL Web App (/exec)" autocomplete="off"><input class="input" id="ss-sd-tok" type="password" placeholder="Mật khẩu" autocomplete="off">
+      <b style="font-size:13px">📦 Ứng thuốc tủ trực</b>
+      <input class="input" id="ss-ung-url" placeholder="URL Web App (/exec)" autocomplete="off"><input class="input" id="ss-ung-tok" type="password" placeholder="Mật khẩu" autocomplete="off">
       <button class="btn btn-primary" onclick="ss_save()">Lưu kết nối</button>
       <div id="ss-msg" style="font-size:12.5px;font-weight:600"></div>
     </div>
@@ -4949,7 +4994,8 @@ function tk_parseSheet(wb, typeFilter) {
     const hlCol  =ci('hàm lượng');
     const slCol  =ci('số lượng');
     const typeCol=ci('loại chứng từ');
-    const khoaCol=ci('khoa phòng'); // -1 if absent (nhap file)
+    let khoaCol=ci('khoa phòng'); // -1 if absent (nhap file)
+    if(khoaCol===-1) khoaCol=hdrs.findIndex(h=>h==='khoa'||h.includes('khoa')||h.includes('nơi nhận')||h.includes('đơn vị'));
     const loCol  =ci('lô');
     const hanCol =hdrs.findIndex(h=>h.includes('hạn'));
     const tenCtyCol=hdrs.findIndex(h=>h==='tên'); // nhap: Tên = tên công ty
@@ -7334,12 +7380,14 @@ function ss_render() {
   const g = k => localStorage.getItem(k) || '';
   document.getElementById('ss-pb-url').value = g('pb_cloud_url'); document.getElementById('ss-pb-tok').value = g('pb_cloud_token');
   document.getElementById('ss-sd-url').value = g('sdb_url'); document.getElementById('ss-sd-tok').value = g('sdb_token');
+  document.getElementById('ss-ung-url').value = g('ung_url'); document.getElementById('ss-ung-tok').value = g('ung_token');
   fsMeta().then(m => { document.getElementById('ss-files').innerHTML = m.length ? m.map(x => '<div>• <b>' + x.label + ':</b> ' + sdbE(x.names) + ' <span style="color:#64748b">(' + new Date(x.t).toLocaleString('vi-VN') + ')</span></div>').join('') : 'Chưa nhớ file nào.'; });
 }
 function ss_save() {
   const v = id => document.getElementById(id).value.trim();
   localStorage.setItem('pb_cloud_url', v('ss-pb-url')); localStorage.setItem('pb_cloud_token', v('ss-pb-tok'));
   localStorage.setItem('sdb_url', v('ss-sd-url')); localStorage.setItem('sdb_token', v('ss-sd-tok'));
+  localStorage.setItem('ung_url', v('ss-ung-url')); localStorage.setItem('ung_token', v('ss-ung-tok'));
   SDB.loadedOnce = false; SDB.synced = false;
   const m = document.getElementById('ss-msg'); m.style.color = '#15803d'; m.textContent = 'Đã lưu. Mở lại tab Phân bổ / Nộp BB là tự tải dữ liệu.';
 }
@@ -7354,7 +7402,8 @@ const HOME = [
   { sec: 'Thẻ kho', bg: '#dbeafe', items: [
     { ic: '📁', t: 'Nhập dữ liệu kho', d: 'Nạp file xuất, nhập, tồn', go: () => { switchApp(2); goScreen('sc-data'); } },
     { ic: '📊', t: 'Thẻ kho', d: 'Xem, in thẻ kho theo mã', go: () => { switchApp(2); goScreen('sc-the-kho'); } },
-    { ic: '📝', t: 'Kiểm kê', d: 'Biên bản kiểm kê', go: () => { switchApp(2); goScreen('sc-bbkk'); if (typeof renderBBKK === 'function') renderBBKK(); } } ] },
+    { ic: '📝', t: 'Kiểm kê', d: 'Biên bản kiểm kê', go: () => { switchApp(2); goScreen('sc-bbkk'); if (typeof renderBBKK === 'function') renderBBKK(); } },
+    { ic: '📦', t: 'Ứng tủ trực', d: 'Khoa đang ứng bao nhiêu thuốc', go: () => { switchApp(2); goScreen('sc-ung'); ung_open(); } } ] },
   { sec: 'Khác', bg: '#ede9fe', items: [
     { ic: '📈', t: 'Theo dõi phân bổ', d: 'Phân bổ và nhập kho theo thầu', go: () => switchApp(5) },
     { ic: '🏥', t: 'Thông tư 20', d: 'Điền STT TT20/2022', go: () => switchApp(3) },
@@ -7473,6 +7522,139 @@ function shv_open(ma) {
   selectDrug(key); const t = document.getElementById('tk-picker'); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 shv_mount();
+
+/* ═══ Ứng thuốc tủ trực: tính liên tục theo thời gian (ứng xuất − ứng trả) + lưu Google Sheet ═══ */
+const UNG = { mode: 'khoa', f: 'pos', q: '', open: new Set(), openMap: null, openAsof: '', asofs: null, data: null, meta: null };
+const ungF = n => Number(n || 0).toLocaleString('vi-VN', { maximumFractionDigits: 2 });
+const ungK = (kh, ma) => String(kh).trim().toLowerCase() + '|' + normMa(ma);
+function ung_compute() {
+  if (typeof xuatWB === 'undefined' || (!xuatWB && !nhapWB)) return { err: 'Chưa có file Xuất / Nhập. Vào “Nhập dữ liệu kho” để nạp (app sẽ nhớ file cho lần sau).' };
+  const U = TU_TRUC_XUAT.map(x => x.toLowerCase()), T = TU_TRUC_NHAP.map(x => x.toLowerCase());
+  let recs = [];
+  try {
+    if (xuatWB) recs = recs.concat(tk_parseSheet(xuatWB, [...XUAT_TYPES, ...TU_TRUC_XUAT, ...TU_TRUC_NHAP]) || []);
+    if (nhapWB) recs = recs.concat(tk_parseSheet(nhapWB, [...NHAP_TYPES, ...TU_TRUC_NHAP, ...TU_TRUC_XUAT]) || []);
+  } catch (e) { return { err: 'Không đọc được file: ' + e.message }; }
+  const after = UNG.openAsof || '';
+  const ev = [];
+  recs.forEach(r => { const lt = String(r.loaiCT || '').trim().toLowerCase(); const kind = U.includes(lt) ? 'ung' : T.includes(lt) ? 'tra' : ''; if (!kind || (after && r.date <= after)) return; ev.push({ kind, date: r.date, khoa: r.khoa || '(Không rõ khoa)', ma: r.ma || r.ten, ten: r.ten, hl: r.hl, sl: r.sl, loai: r.loaiCT }); });
+  const by = {};
+  ev.forEach(e => { const k = ungK(e.khoa, e.ma); (by[k] = by[k] || { khoa: e.khoa, ma: e.ma, ten: e.ten, hl: e.hl, ev: [] }).ev.push(e); });
+  if (UNG.openMap) Object.keys(UNG.openMap).forEach(k => { if (!by[k]) { const o = UNG.openMap[k]; by[k] = { khoa: o.khoa, ma: o.ma, ten: o.ten, hl: o.hl, ev: [] }; } });
+  const rows = Object.keys(by).map(k => {
+    const g = by[k], open = UNG.openMap && UNG.openMap[k] ? UNG.openMap[k].con : 0;
+    g.ev.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : (a.kind === b.kind ? 0 : a.kind === 'ung' ? -1 : 1));
+    let run = open, ung = 0, tra = 0, min = open;
+    g.ev.forEach(e => { if (e.kind === 'ung') { run += e.sl; ung += e.sl; } else { run -= e.sl; tra += e.sl; } e.run = run; if (run < min) min = run; });
+    return { key: k, khoa: g.khoa, ma: g.ma, ten: g.ten, hl: g.hl, open, ung, tra, con: run, min, ev: g.ev };
+  });
+  const dates = ev.map(e => e.date).sort();
+  return { rows, from: dates[0] || '', to: dates[dates.length - 1] || '', noKhoa: ev.filter(e => e.khoa === '(Không rõ khoa)').length, nEv: ev.length };
+}
+function ung_open() { UNG.data = ung_compute(); ung_render(); if (!UNG.asofs && ungCfg().url) ung_loadAsofs(); }
+function ung_btns() {
+  document.getElementById('ung-mode').innerHTML = [['khoa', 'Theo khoa'], ['ma', 'Theo thuốc']].map(([k, l]) => '<button class="sdb-pill' + (UNG.mode === k ? ' on' : '') + '" onclick="UNG.mode=\'' + k + '\';ung_render()">' + l + '</button>').join('');
+  document.getElementById('ung-f').innerHTML = [['pos', 'Còn ứng'], ['all', 'Tất cả'], ['neg', 'Âm']].map(([k, l]) => '<button class="sdb-pill' + (UNG.f === k ? ' on' : '') + '" onclick="UNG.f=\'' + k + '\';ung_render()">' + l + '</button>').join('');
+}
+function ung_render() {
+  ung_btns();
+  const D = UNG.data, L = document.getElementById('ung-list'), M = document.getElementById('ung-msg'), S = document.getElementById('ung-sum');
+  if (!D || D.err) { S.innerHTML = ''; M.textContent = ''; L.innerHTML = '<div class="shv-m">' + shvE(D ? D.err : 'Đang tính…') + '</div>'; return; }
+  const all = D.rows, pos = all.filter(r => r.con > 0), neg = all.filter(r => r.con < 0);
+  S.innerHTML = '<div><b style="color:#1d4ed8">' + new Set(pos.map(r => r.khoa)).size + '</b><span>Khoa đang ứng</span></div><div><b>' + new Set(pos.map(r => normMa(r.ma))).size + '</b><span>Mặt hàng</span></div><div><b style="color:#1d4ed8">' + ungF(pos.reduce((a, r) => a + r.con, 0)) + '</b><span>Tổng SL còn ứng</span></div>' + (neg.length ? '<div><b class="ung-neg">' + neg.length + '</b><span>Dòng âm (trả > ứng)</span></div>' : '');
+  let note = '📅 Tính từ ' + sdbDmy(D.from) + ' đến ' + sdbDmy(D.to) + ' · ' + D.nEv + ' lần ứng/trả' + (UNG.openAsof ? ' · đầu kỳ = bản chốt ' + sdbDmy(UNG.openAsof) + ' (chỉ tính sau ngày này)' : '');
+  if (D.noKhoa) note += '\n⚠️ ' + D.noKhoa + ' dòng không có cột Khoa phòng trong file nên gom vào “(Không rõ khoa)”.';
+  if (neg.length && !UNG.openAsof) note += '\n⚠️ Dòng âm thường do file không bắt đầu từ lúc mới ứng — chọn “Tồn ứng đầu kỳ” từ bản chốt đã lưu để bù.';
+  M.style.whiteSpace = 'pre-wrap'; M.style.color = D.noKhoa || neg.length ? '#b45309' : '#475569'; M.textContent = note;
+  const q = UNG.q;
+  let rows = all.filter(r => (UNG.f === 'all' || (UNG.f === 'pos' ? r.con > 0 : r.con < 0)) && (!q || (r.khoa + ' ' + r.ma + ' ' + r.ten).toLowerCase().includes(q)));
+  if (!rows.length) { L.innerHTML = '<div class="shv-m">Không có dòng nào.</div>'; return; }
+  const gk = UNG.mode === 'khoa' ? r => r.khoa : r => r.ma, groups = {};
+  rows.forEach(r => { (groups[gk(r)] = groups[gk(r)] || []).push(r); });
+  const hasOpen = !!UNG.openMap;
+  const cell = n => '<td class="' + (n > 0 ? 'ung-pos' : n < 0 ? 'ung-neg' : 'ung-zero') + '">' + ungF(n) + '</td>';
+  let h = '<table class="ung-t"><thead><tr><th>' + (UNG.mode === 'khoa' ? 'Khoa phòng / Thuốc' : 'Thuốc / Khoa phòng') + '</th>' + (hasOpen ? '<th>Đầu kỳ</th>' : '') + '<th>Ứng</th><th>Trả</th><th>Còn ứng</th></tr></thead><tbody>';
+  Object.keys(groups).sort((a, b) => a.localeCompare(b, 'vi')).forEach(g => {
+    const rs = groups[g], tot = rs.reduce((a, r) => a + r.con, 0), isOpen = q || UNG.open.has(UNG.mode + '|' + g);
+    const label = UNG.mode === 'khoa' ? shvE(g) : shvE(rs[0].ten) + ' <small style="color:#64748b">' + shvE(rs[0].ma) + '</small>';
+    h += '<tr class="ung-g" data-g="' + shvE(UNG.mode + '|' + g) + '"><td>' + (isOpen ? '▾ ' : '▸ ') + label + ' <small style="font-weight:500;color:#64748b">(' + rs.length + ')</small></td>' + (hasOpen ? '<td></td>' : '') + '<td></td><td></td><td class="' + (tot > 0 ? 'ung-pos' : tot < 0 ? 'ung-neg' : 'ung-zero') + '">' + ungF(tot) + '</td></tr>';
+    if (isOpen) rs.sort((a, b) => b.con - a.con).forEach(r => {
+      const lab = UNG.mode === 'khoa' ? shvE(r.ten) + ' <small>' + shvE(r.hl) + ' · ' + shvE(r.ma) + '</small>' : shvE(r.khoa);
+      h += '<tr class="ung-c" data-k="' + shvE(r.key) + '"><td>' + lab + (r.min < 0 && r.con >= 0 ? ' <small title="Từng âm trong kỳ">⚠</small>' : '') + '</td>' + (hasOpen ? '<td>' + ungF(r.open) + '</td>' : '') + '<td>' + ungF(r.ung) + '</td><td>' + ungF(r.tra) + '</td>' + cell(r.con) + '</tr>';
+    });
+  });
+  L.innerHTML = h + '</tbody></table>';
+}
+document.getElementById('ung-list').addEventListener('click', e => {
+  const g = e.target.closest('.ung-g'), c = e.target.closest('.ung-c');
+  if (g) { const k = g.dataset.g; UNG.open.has(k) ? UNG.open.delete(k) : UNG.open.add(k); ung_render(); }
+  else if (c) { const r = UNG.data.rows.find(x => x.key === c.dataset.k); if (!r) return;
+    document.getElementById('ung-pop-t').textContent = r.khoa + ' — ' + r.ten;
+    document.getElementById('ung-pop-b').innerHTML = '<table class="ung-t"><thead><tr><th>Ngày</th><th>Loại</th><th>SL</th><th>Còn ứng</th></tr></thead><tbody>' + (UNG.openMap ? '<tr><td>Đầu kỳ</td><td></td><td></td><td>' + ungF(r.open) + '</td></tr>' : '') + r.ev.map(e => '<tr><td>' + sdbDmy(e.date) + '</td><td style="white-space:normal">' + shvE(e.loai) + '</td><td class="' + (e.kind === 'ung' ? 'ung-pos">+' : 'ung-neg">−') + ungF(e.sl) + '</td><td>' + ungF(e.run) + '</td></tr>').join('') + '</tbody></table>';
+    document.getElementById('ung-pop').classList.add('on'); }
+});
+/* ── Google Sheet ── */
+const ungCfg = () => ({ url: localStorage.getItem('ung_url') || '', token: localStorage.getItem('ung_token') || '' });
+async function ungApi(action, extra) {
+  const c = ungCfg(); if (!c.url) throw new Error('Chưa kết nối Google Sheet (bấm ⚙ Sheet).');
+  let res; try { res = await fetch(c.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ action, token: c.token }, extra || {})) }); } catch (e) { throw new Error('Không kết nối được. Kiểm tra URL Web App và quyền “Anyone”.'); }
+  let d; try { d = await res.json(); } catch (e) { throw new Error('Phản hồi không hợp lệ. Kiểm tra URL /exec và đã Deploy phiên bản mới.'); }
+  if (!d.ok) throw new Error(d.error || 'Script báo lỗi'); return d;
+}
+function ung_cfgOpen() { const c = ungCfg(); document.getElementById('ung-url').value = c.url; document.getElementById('ung-tok').value = c.token; document.getElementById('ung-cfg-msg').textContent = ''; document.getElementById('ung-cfg').classList.add('on'); }
+function ung_cfgSave() { localStorage.setItem('ung_url', document.getElementById('ung-url').value.trim()); localStorage.setItem('ung_token', document.getElementById('ung-tok').value.trim()); UNG.asofs = null; document.getElementById('ung-cfg').classList.remove('on'); ung_loadAsofs(true); }
+async function ung_cfgTest() {
+  localStorage.setItem('ung_url', document.getElementById('ung-url').value.trim()); localStorage.setItem('ung_token', document.getElementById('ung-tok').value.trim());
+  const m = document.getElementById('ung-cfg-msg'); m.className = 'sdb-msg'; m.textContent = 'Đang kiểm tra…';
+  try { const d = await ungApi('ping'); m.className = 'sdb-msg ok'; m.textContent = 'Kết nối OK — sheet “' + d.sheet + '”, ' + d.rows + ' dòng.'; } catch (e) { m.className = 'sdb-msg bad'; m.textContent = e.message; }
+}
+async function ung_loadAsofs(force) {
+  const sel = document.getElementById('ung-open'); if (!ungCfg().url) return;
+  try { const d = await ungApi('list'); UNG.asofs = d.asofs || []; const keep = UNG.openAsof;
+    sel.innerHTML = '<option value="">Không — tính từ file</option>' + UNG.asofs.slice().reverse().map(a => '<option value="' + a + '">Bản chốt ' + sdbDmy(a) + '</option>').join(''); sel.value = keep;
+  } catch (e) { if (force) alert(e.message); }
+}
+async function ung_setOpen(a) {
+  if (!a) { UNG.openAsof = ''; UNG.openMap = null; ung_open(); return; }
+  try { const d = await ungApi('get', { asof: a }); UNG.openMap = {}; (d.rows || []).forEach(r => { UNG.openMap[ungK(r.khoa, r.ma)] = r; }); UNG.openAsof = a; ung_open(); }
+  catch (e) { alert(e.message); document.getElementById('ung-open').value = UNG.openAsof; }
+}
+async function ung_save() {
+  const D = UNG.data; if (!D || D.err || !D.rows.length) { alert('Chưa có dữ liệu để lưu.'); return; }
+  if (!ungCfg().url) { ung_cfgOpen(); return; }
+  const rows = D.rows.filter(r => r.con !== 0).map(r => ({ khoa: r.khoa, ma: r.ma, ten: r.ten, hl: r.hl, ung: r.ung, tra: r.tra, con: r.con }));
+  if (!confirm('Lưu bản chốt ngày ' + sdbDmy(D.to) + ' lên Google Sheet?\n' + rows.length + ' dòng (khoa × thuốc) còn ứng.\nNếu ngày này đã có bản chốt, sẽ được ghi đè.')) return;
+  try { const r = await ungApi('save', { asof: D.to, rows }); const M = document.getElementById('ung-msg'); M.style.color = '#15803d'; M.textContent = '✅ Đã lưu ' + r.saved + ' dòng, bản chốt ngày ' + sdbDmy(D.to) + '.'; ung_loadAsofs(); }
+  catch (e) { alert('Lưu thất bại: ' + e.message); }
+}
+function ung_excel() {
+  const D = UNG.data; if (!D || D.err || !D.rows.length) { alert('Chưa có dữ liệu.'); return; }
+  const aoa = [['Khoa phòng', 'Mã', 'Tên thuốc', 'HL', 'Đầu kỳ', 'Ứng', 'Trả', 'Còn ứng']].concat(D.rows.slice().sort((a, b) => a.khoa.localeCompare(b.khoa, 'vi') || a.ten.localeCompare(b.ten, 'vi')).map(r => [r.khoa, r.ma, r.ten, r.hl, r.open, r.ung, r.tra, r.con]));
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), 'Ung tu truc'); XLSX.writeFile(wb, 'Ung_tu_truc_' + D.to + '.xlsx');
+}
+(function () { const a = document.querySelector('#sc-the-kho > button.btn-green'); if (a && !document.getElementById('ung-go')) a.insertAdjacentHTML('afterend', '<button id="ung-go" class="btn btn-ghost" onclick="goScreen(\'sc-ung\');ung_open()" style="height:42px">📦 Ứng thuốc tủ trực — khoa đang ứng bao nhiêu</button>'); })();
+
+function ung_print() {
+  const D = UNG.data; if (!D || D.err || !D.rows.length) { alert('Chưa có dữ liệu để in.'); return; }
+  const q = UNG.q;
+  const rows = D.rows.filter(r => (UNG.f === 'all' || (UNG.f === 'pos' ? r.con > 0 : r.con < 0)) && (!q || (r.khoa + ' ' + r.ma + ' ' + r.ten).toLowerCase().includes(q)));
+  if (!rows.length) { alert('Không có dòng nào để in (đang lọc).'); return; }
+  const byKhoa = UNG.mode === 'khoa', hasOpen = !!UNG.openMap, groups = {};
+  rows.forEach(r => { const g = byKhoa ? r.khoa : r.ma; (groups[g] = groups[g] || []).push(r); });
+  const nc = hasOpen ? 7 : 6, E = shvE;
+  let body = '', total = 0;
+  Object.keys(groups).sort((a, b) => a.localeCompare(b, 'vi')).forEach(g => {
+    const rs = groups[g].sort((a, b) => (byKhoa ? a.ten.localeCompare(b.ten, 'vi') : a.khoa.localeCompare(b.khoa, 'vi'))), sub = rs.reduce((x, r) => x + r.con, 0);
+    total += sub;
+    body += '<tr class="g"><td colspan="' + (nc - 1) + '">' + (byKhoa ? 'KHOA: ' + E(g) : E(rs[0].ten) + ' (' + E(rs[0].ma) + ')') + '</td><td class="n">' + ungF(sub) + '</td></tr>';
+    rs.forEach((r, i) => { body += '<tr><td class="c">' + (i + 1) + '</td><td>' + (byKhoa ? E(r.ten) + '</td><td>' + E(r.hl) : E(r.khoa) + '</td><td>') + '</td>' + (hasOpen ? '<td class="n">' + ungF(r.open) + '</td>' : '') + '<td class="n">' + ungF(r.ung) + '</td><td class="n">' + ungF(r.tra) + '</td><td class="n"><b>' + ungF(r.con) + '</b></td></tr>'; });
+  });
+  const lab = { pos: 'Chỉ các thuốc còn ứng', all: 'Tất cả', neg: 'Các dòng âm (trả > ứng)' }[UNG.f];
+  const th = '<tr><th style="width:34px">STT</th><th>' + (byKhoa ? 'Tên thuốc</th><th style="width:90px">Hàm lượng' : 'Khoa phòng</th><th style="width:20px">') + '</th>' + (hasOpen ? '<th style="width:60px">Đầu kỳ</th>' : '') + '<th style="width:60px">Ứng</th><th style="width:60px">Trả</th><th style="width:70px">Còn ứng</th></tr>';
+  const today = new Date(), dd = today.getDate() + '/' + (today.getMonth() + 1) + '/' + today.getFullYear();
+  const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Ứng thuốc tủ trực</title><style>@page{size:A4;margin:12mm}*{box-sizing:border-box}body{font-family:"Times New Roman",serif;font-size:13px;color:#000}h2{text-align:center;font-size:17px;margin:0}p.s{text-align:center;margin:4px 0 12px}table{width:100%;border-collapse:collapse}thead{display:table-header-group}tr{page-break-inside:avoid}th,td{border:1px solid #000;padding:4px 6px}th{background:#eee}.c{text-align:center}.n{text-align:right}tr.g td{background:#dfe6f3;font-weight:bold}.sig{display:flex;justify-content:space-around;margin-top:22px;text-align:center}.sig div{width:40%}</style></head><body><h2>BẢNG THUỐC CÁC KHOA PHÒNG CÒN ỨNG TỦ TRỰC</h2><p class="s">Từ ' + sdbDmy(D.from) + ' đến ' + sdbDmy(D.to) + (UNG.openAsof ? ' (đầu kỳ: bản chốt ' + sdbDmy(UNG.openAsof) + ')' : '') + ' · ' + lab + ' · ' + (byKhoa ? 'Theo khoa' : 'Theo thuốc') + '</p><table><thead>' + th + '</thead><tbody>' + body + '<tr class="g"><td colspan="' + (nc - 1) + '" class="n">TỔNG CỘNG</td><td class="n">' + ungF(total) + '</td></tr></tbody></table><div class="sig"><div><i>Ngày ' + dd + '</i><br><b>Người lập</b><br><br><br></div><div><br><b>Trưởng khoa Dược</b><br><br><br></div></div></body></html>';
+  mobilePrint(html, 'Ứng thuốc tủ trực');
+}
 </script>
 </body>
 </html>
