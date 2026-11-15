@@ -1289,6 +1289,25 @@ body.home-open #bbhv-inner-nav{display:none!important}
 #home.cp .hm-n{font-size:13.5px}
 #home.cp .hm-d{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #home.cp .hm-b{font-size:10.5px;padding:1px 7px}
+
+/* ═══ Xem dữ liệu Google Sheet trong Thẻ kho / Kiểm kê ═══ */
+.shv{background:#fff;border:1px solid #dbe3ee;border-radius:14px;overflow:hidden}
+.shv-h{display:flex;align-items:center;gap:8px;padding:11px 14px;cursor:pointer;font-weight:800;font-size:14px;color:#0f2438;background:linear-gradient(135deg,#eff6ff,#f5f3ff)}
+.shv-h span{flex:1}.shv-h i{font-style:normal;color:#64748b;font-size:12px;font-weight:700}
+.shv-b{padding:10px 12px;display:none;flex-direction:column;gap:8px}.shv.on .shv-b{display:flex}
+.shv-r{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.shv-r select,.shv-r input{height:34px;border:1.5px solid #d3dbe7;border-radius:9px;padding:0 9px;font:600 13px inherit;background:#fff;min-width:0}
+.shv-r select{flex:1 1 170px}.shv-r input{flex:1 1 120px}
+.shv-p{border:0;background:#eef2f7;border-radius:8px;padding:6px 11px;font:700 12.5px inherit;color:#475569;cursor:pointer}.shv-p.on{background:#1d4ed8;color:#fff}
+.shv-sum{font-size:12.5px;color:#475569}.shv-sum b{color:#0f2438}
+.shv-w{max-height:320px;overflow:auto;border:1px solid #dfe5ee;border-radius:10px}
+.shv-t{border-collapse:collapse;width:100%;font-size:12.5px}
+.shv-t th{position:sticky;top:0;background:#1e3a8a;color:#fff;text-align:left;padding:6px 8px;white-space:nowrap;z-index:1}
+.shv-t td{padding:5px 8px;border-top:1px solid #eef1f6;white-space:nowrap}.shv-t td.n,.shv-t th.n{text-align:right;font-variant-numeric:tabular-nums}
+.shv-t tbody tr:nth-child(even){background:#f7f9fc}.shv-t tr.go{cursor:pointer}.shv-t tr.go:hover{background:#eaf2ff}
+.shv-t td.nm{white-space:normal;min-width:150px;font-weight:600;color:#1e3a8a}
+.shv-pos{color:#15803d;font-weight:800}.shv-neg{color:#dc2626;font-weight:800}.shv-new{color:#b45309;font-weight:700}
+.shv-m{padding:14px;text-align:center;color:#64748b;font-size:13px}
 </style>
 </head>
 <body>
@@ -7377,8 +7396,10 @@ function home_fit() {
   const secs = [...h.querySelectorAll('.hm-g')].map(g => g.children.length);
   const rows = secs.reduce((a, n) => a + Math.ceil(n / cols), 0);
   const fixed = h.querySelector('.hm-top').offsetHeight + h.querySelector('#hm-files').offsetHeight + secs.length * 32 + 30 + rows * 8;
-  const th = Math.max(54, Math.min(130, Math.floor((h.clientHeight - fixed) / Math.max(rows, 1))));
-  h.style.setProperty('--hm-c', cols); h.style.setProperty('--hm-th', th + 'px'); h.classList.toggle('cp', th < 96);
+  const vh = (window.visualViewport ? window.visualViewport.height : window.innerHeight) - (document.getElementById('topbar') || { offsetHeight: 64 }).offsetHeight - 70;
+  const avail = Math.min(h.clientHeight, vh);
+  const th = Math.max(54, Math.min(130, Math.floor((avail - fixed) / Math.max(rows, 1))));
+  h.style.setProperty('--hm-c', cols); h.style.setProperty('--hm-th', th + 'px'); h.classList.toggle('cp', th < 96 || W < 600);
 }
 ['resize', 'orientationchange'].forEach(ev => window.addEventListener(ev, () => setTimeout(home_fit, 60)));
 if (window.visualViewport) window.visualViewport.addEventListener('resize', () => setTimeout(home_fit, 60));
@@ -7386,6 +7407,72 @@ document.body.classList.add('home-open');
 history.replaceState(null, '', location.pathname + location.search);
 home_render();
 window.addEventListener('load', () => { setTimeout(fsRestore, 300); });
+
+/* ═══ Xem dữ liệu tồn đã lưu trên Google Sheet (Thẻ kho + Kiểm kê) ═══ */
+const SHV = {};
+const shvE = v => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const shvN = n => Number(n || 0).toLocaleString('vi-VN');
+function shv_card(k) {
+  SHV[k] = { months: null, month: '', data: null, q: '', f: 'all', loading: false };
+  return '<div class="shv" id="shv-' + k + '"><div class="shv-h" onclick="shv_toggle(\'' + k + '\')"><span>☁️ Dữ liệu đã lưu trên Google Sheet</span><i id="shv-' + k + '-st">Bấm để xem</i></div><div class="shv-b">' +
+    '<div class="shv-r"><select id="shv-' + k + '-m" onchange="shv_pick(\'' + k + '\',this.value)"></select><button class="shv-p" onclick="shv_months(\'' + k + '\',true)">🔄 Tải lại</button></div>' +
+    '<div class="shv-r"><input id="shv-' + k + '-q" placeholder="🔍 Tìm mã, tên thuốc…" oninput="SHV[\'' + k + '\'].q=this.value.trim().toLowerCase();shv_render(\'' + k + '\')" autocomplete="off">' +
+    '<button class="shv-p on" data-f="all" onclick="shv_f(\'' + k + '\',\'all\')">Tất cả</button><button class="shv-p" data-f="diff" onclick="shv_f(\'' + k + '\',\'diff\')">Chênh lệch</button></div>' +
+    '<div class="shv-sum" id="shv-' + k + '-sum"></div><div class="shv-w" id="shv-' + k + '-w"></div></div></div>';
+}
+function shv_mount() {
+  const a = document.querySelector('#sc-the-kho > button.btn-green'); if (a && !document.getElementById('shv-tk')) a.insertAdjacentHTML('afterend', shv_card('tk'));
+  const b = document.querySelector('#sc-bbkk > .hero'); if (b && !document.getElementById('shv-kk')) b.insertAdjacentHTML('afterend', shv_card('kk'));
+}
+function shv_toggle(k) {
+  const el = document.getElementById('shv-' + k); el.classList.toggle('on');
+  if (el.classList.contains('on')) { if (!SHV[k].months) shv_months(k); else shv_render(k); }
+}
+function shv_f(k, f) { SHV[k].f = f; document.querySelectorAll('#shv-' + k + ' .shv-p[data-f]').forEach(b => b.classList.toggle('on', b.dataset.f === f)); shv_render(k); }
+function shv_msg(k, t) { document.getElementById('shv-' + k + '-w').innerHTML = '<div class="shv-m">' + t + '</div>'; document.getElementById('shv-' + k + '-sum').textContent = ''; }
+async function shv_months(k, force) {
+  const S = SHV[k], sel = document.getElementById('shv-' + k + '-m');
+  if (!cloudConfigured()) { shv_msg(k, 'Chưa kết nối Google Sheet tồn kho.<br>Vào ⚙️ Cài đặt → “Lưu tồn kho lên Google Sheet” để nhập URL và mật khẩu.'); sel.innerHTML = ''; return; }
+  if (force) { Object.keys(tonSheetCache).forEach(x => delete tonSheetCache[x]); }
+  shv_msg(k, '⏳ Đang tải danh sách tháng…');
+  try {
+    const months = ((await cloudCall({ action: 'list' })).months || []).slice().sort().reverse();
+    S.months = months;
+    sel.innerHTML = months.length ? months.map(m => '<option value="' + m + '">Tồn cuối tháng ' + m + '</option>').join('') : '<option value="">(chưa có tháng nào)</option>';
+    document.getElementById('shv-' + k + '-st').textContent = months.length + ' tháng đã lưu';
+    if (!months.length) { shv_msg(k, 'Google Sheet chưa lưu tháng nào.'); return; }
+    if (!S.month || !months.includes(S.month)) S.month = months[0];
+    sel.value = S.month; shv_pick(k, S.month);
+  } catch (e) { S.months = null; shv_msg(k, '⚠️ ' + shvE(e.message)); }
+}
+async function shv_pick(k, m) {
+  const S = SHV[k]; S.month = m; if (!m) return;
+  shv_msg(k, '⏳ Đang tải tab ' + shvE(m) + '…');
+  try {
+    let d = tonSheetCache[m]; if (!d) { d = await cloudCall({ action: 'get', month: m }); tonSheetCache[m] = d; }
+    if (S.month !== m) return;
+    S.data = d.found ? d.rows : []; shv_render(k);
+  } catch (e) { shv_msg(k, '⚠️ ' + shvE(e.message)); }
+}
+function shv_cur() { const o = {}; try { if (typeof drugMap !== 'undefined' && Object.keys(drugMap).length) getBBKKData().forEach(r => { o[normMa(r.ma)] = r; }); } catch (e) {} return o; }
+function shv_render(k) {
+  const S = SHV[k]; if (!S.data) return;
+  const cur = shv_cur(), hasCur = Object.keys(cur).length > 0;
+  let rows = S.data.map(r => { const c = cur[normMa(r.ma)], t = parseFloat(r.ton) || 0; return { ma: r.ma, ten: r.ten, hl: r.hl, ton: t, cur: c ? c.ton : null, diff: c ? c.ton - t : null }; });
+  const sheetKeys = new Set(S.data.map(r => normMa(r.ma)));
+  if (hasCur) Object.keys(cur).forEach(m => { if (!sheetKeys.has(m)) rows.push({ ma: cur[m].ma, ten: cur[m].ten, hl: cur[m].hl, ton: null, cur: cur[m].ton, diff: null, only: 1 }); });
+  const total = rows.reduce((a, r) => a + (r.ton || 0), 0), nd = rows.filter(r => r.diff || r.only).length;
+  let list = rows.filter(r => (!S.q || (String(r.ma) + ' ' + r.ten).toLowerCase().includes(S.q)) && (S.f === 'all' || r.diff || r.only));
+  document.getElementById('shv-' + k + '-sum').innerHTML = '📄 Tab <b>' + shvE(S.month) + '</b> · <b>' + S.data.length + '</b> mặt hàng · Tổng tồn <b>' + shvN(total) + '</b>' + (hasCur ? ' · <b style="color:' + (nd ? '#dc2626' : '#15803d') + '">' + nd + '</b> mặt hàng lệch so với số liệu đang xử lý' : '');
+  const LIM = 300, shown = list.slice(0, LIM);
+  document.getElementById('shv-' + k + '-w').innerHTML = shown.length ? '<table class="shv-t"><thead><tr><th>Mã</th><th>Tên thuốc</th><th>HL</th><th class="n">Tồn Sheet</th>' + (hasCur ? '<th class="n">Hiện tại</th><th class="n">Lệch</th>' : '') + '</tr></thead><tbody>' + shown.map(r => '<tr' + (k === 'tk' ? ' class="go" onclick="shv_open(\'' + shvE(String(r.ma).replace(/'/g, '')) + '\')"' : '') + '><td>' + shvE(r.ma) + '</td><td class="nm">' + shvE(r.ten) + '</td><td>' + shvE(r.hl) + '</td><td class="n">' + (r.ton === null ? '—' : shvN(r.ton)) + '</td>' + (hasCur ? '<td class="n">' + (r.cur === null ? '—' : shvN(r.cur)) + '</td><td class="n">' + (r.only ? '<span class="shv-new">mới</span>' : r.diff ? '<span class="' + (r.diff > 0 ? 'shv-pos">+' : 'shv-neg">') + shvN(r.diff) + '</span>' : (r.cur === null ? '' : '0')) + '</td>' : '') + '</tr>').join('') + '</tbody></table>' + (list.length > LIM ? '<div class="shv-m">Hiển thị ' + LIM + '/' + list.length + ' dòng — gõ tên để lọc</div>' : '') : '<div class="shv-m">Không có dòng nào.</div>';
+}
+function shv_open(ma) {
+  if (typeof drugMap === 'undefined') return;
+  const key = Object.keys(drugMap).find(x => normMa(drugMap[x].ma || x) === normMa(ma)); if (!key) return;
+  selectDrug(key); const t = document.getElementById('tk-picker'); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+shv_mount();
 </script>
 </body>
 </html>
