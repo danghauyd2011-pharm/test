@@ -2137,7 +2137,7 @@ body.home-open #bbhv-inner-nav{display:none!important}
         <span style="flex:1"></span>
         <button class="btn btn-sm btn-ghost" onclick="ung_cfgOpen()">⚙ Sheet</button>
         <button class="btn btn-sm btn-primary" onclick="ung_save()">☁️ Lưu Sheet</button>
-        <button class="btn btn-sm btn-ghost" onclick="ung_print()">🖨 In</button><button class="btn btn-sm btn-ghost" onclick="ung_excel()">Excel</button>
+        <label style="font-size:12px;color:#475569;display:flex;align-items:center;gap:4px"><input type="checkbox" id="ung-pb">mỗi khoa 1 trang</label><button class="btn btn-sm btn-ghost" onclick="ung_print()">🖨 In</button><button class="btn btn-sm btn-ghost" onclick="ung_excel()">Excel</button>
       </div>
       <div class="ung-r"><span style="font-size:12.5px;font-weight:700;color:#475569">Tồn ứng đầu kỳ:</span>
         <select id="ung-open" class="input" style="flex:1;min-width:150px;height:32px;font-size:12.5px" onchange="ung_setOpen(this.value)"><option value="">Không — tính từ file</option></select>
@@ -7634,25 +7634,26 @@ function ung_excel() {
 }
 (function () { const a = document.querySelector('#sc-the-kho > button.btn-green'); if (a && !document.getElementById('ung-go')) a.insertAdjacentHTML('afterend', '<button id="ung-go" class="btn btn-ghost" onclick="goScreen(\'sc-ung\');ung_open()" style="height:42px">📦 Ứng thuốc tủ trực — khoa đang ứng bao nhiêu</button>'); })();
 
+function ung_warnKind(r) { return r.ung > 0 && r.tra > 0 && (r.con < 0 || (r.con > 0 && r.con < r.ung)) ? 'a' : (r.tra > 0 && r.ung === 0 && r.con < 0 ? 'b' : ''); }
 function ung_print() {
   const D = UNG.data; if (!D || D.err || !D.rows.length) { alert('Chưa có dữ liệu để in.'); return; }
-  const q = UNG.q;
-  const rows = D.rows.filter(r => (UNG.f === 'all' || (UNG.f === 'pos' ? r.con > 0 : r.con < 0)) && (!q || (r.khoa + ' ' + r.ma + ' ' + r.ten).toLowerCase().includes(q)));
-  if (!rows.length) { alert('Không có dòng nào để in (đang lọc).'); return; }
-  const byKhoa = UNG.mode === 'khoa', hasOpen = !!UNG.openMap, groups = {};
-  rows.forEach(r => { const g = byKhoa ? r.khoa : r.ma; (groups[g] = groups[g] || []).push(r); });
-  const nc = hasOpen ? 7 : 6, E = shvE;
-  let body = '', total = 0;
+  const q = UNG.q, E = shvE, pb = document.getElementById('ung-pb') && document.getElementById('ung-pb').checked;
+  const rows = D.rows.filter(r => !q || (r.khoa + ' ' + r.ma + ' ' + r.ten).toLowerCase().includes(q)), groups = {};
+  rows.forEach(r => { (groups[r.khoa] = groups[r.khoa] || []).push(r); });
+  let blocks = '', n = 0;
   Object.keys(groups).sort((a, b) => a.localeCompare(b, 'vi')).forEach(g => {
-    const rs = groups[g].sort((a, b) => (byKhoa ? a.ten.localeCompare(b.ten, 'vi') : a.khoa.localeCompare(b.khoa, 'vi'))), sub = rs.reduce((x, r) => x + r.con, 0);
-    total += sub;
-    body += '<tr class="g"><td colspan="' + (nc - 1) + '">' + (byKhoa ? 'KHOA: ' + E(g) : E(rs[0].ten) + ' (' + E(rs[0].ma) + ')') + '</td><td class="n">' + ungF(sub) + '</td></tr>';
-    rs.forEach((r, i) => { body += '<tr><td class="c">' + (i + 1) + '</td><td>' + (byKhoa ? E(r.ten) + '</td><td>' + E(r.hl) : E(r.khoa) + '</td><td>') + '</td>' + (hasOpen ? '<td class="n">' + ungF(r.open) + '</td>' : '') + '<td class="n">' + ungF(r.ung) + '</td><td class="n">' + ungF(r.tra) + '</td><td class="n"><b>' + ungF(r.con) + '</b></td></tr>'; });
+    const rs = groups[g], main = rs.filter(r => r.con > 0).sort((a, b) => a.ten.localeCompare(b.ten, 'vi')), warns = rs.filter(r => ung_warnKind(r)).sort((a, b) => a.ten.localeCompare(b.ten, 'vi'));
+    if (!main.length && !warns.length) return;
+    n++;
+    let t = '<div class="blk' + (pb && n > 1 ? ' pb' : '') + '"><h3>KHOA: ' + E(g) + ' <span>— ' + main.length + ' mặt hàng còn ứng</span></h3>';
+    t += '<table><colgroup><col style="width:34px"><col><col style="width:68px"><col style="width:68px"><col style="width:68px"><col style="width:84px"><col style="width:70px"><col style="width:70px"><col style="width:70px"></colgroup><thead><tr><th>STT</th><th>Tên thuốc</th><th>Còn ứng</th><th>Trả phiếu</th><th>Ứng phiếu</th><th>Ứng thuốc mới</th><th></th><th></th><th></th></tr></thead><tbody>';
+    t += main.length ? main.map((r, i) => '<tr><td class="c">' + (i + 1) + '</td><td>' + E(r.ten) + (r.hl && !String(r.ten).includes(r.hl) ? ' <small>' + E(r.hl) + '</small>' : '') + ' <small>(' + E(r.ma) + ')</small>' + (ung_warnKind(r) ? ' <b>⚠</b>' : '') + '</td><td class="n"><b>' + ungF(r.con) + '</b></td><td class="n">' + ungF(r.tra) + '</td><td class="n">' + ungF(r.ung) + '</td><td></td><td></td><td></td><td></td></tr>').join('') : '<tr><td colspan="9" class="c"><i>Không có thuốc còn ứng</i></td></tr>';
+    t += '</tbody></table>';
+    if (warns.length) t += '<div class="w"><b>⚠ Cần theo dõi:</b><ul>' + warns.map(r => '<li><b>' + E(r.ten) + '</b> (' + E(r.ma) + '): ' + (ung_warnKind(r) === 'a' ? 'ứng ' + ungF(r.ung) + ', trả ' + ungF(r.tra) + ', còn ' + ungF(r.con) + (r.con < 0 ? ' — trả nhiều hơn số ứng' : ' — trả chưa đủ so với số ứng') : 'có trả ' + ungF(r.tra) + ' nhưng không có ứng cùng mã (còn ' + ungF(r.con) + ') — kiểm tra ứng bằng mã khác') + '</li>').join('') + '</ul></div>';
+    blocks += t + '</div>';
   });
-  const lab = { pos: 'Chỉ các thuốc còn ứng', all: 'Tất cả', neg: 'Các dòng âm (trả > ứng)' }[UNG.f];
-  const th = '<tr><th style="width:34px">STT</th><th>' + (byKhoa ? 'Tên thuốc</th><th style="width:90px">Hàm lượng' : 'Khoa phòng</th><th style="width:20px">') + '</th>' + (hasOpen ? '<th style="width:60px">Đầu kỳ</th>' : '') + '<th style="width:60px">Ứng</th><th style="width:60px">Trả</th><th style="width:70px">Còn ứng</th></tr>';
-  const today = new Date(), dd = today.getDate() + '/' + (today.getMonth() + 1) + '/' + today.getFullYear();
-  const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Ứng thuốc tủ trực</title><style>@page{size:A4;margin:12mm}*{box-sizing:border-box}body{font-family:"Times New Roman",serif;font-size:13px;color:#000}h2{text-align:center;font-size:17px;margin:0}p.s{text-align:center;margin:4px 0 12px}table{width:100%;border-collapse:collapse}thead{display:table-header-group}tr{page-break-inside:avoid}th,td{border:1px solid #000;padding:4px 6px}th{background:#eee}.c{text-align:center}.n{text-align:right}tr.g td{background:#dfe6f3;font-weight:bold}.sig{display:flex;justify-content:space-around;margin-top:22px;text-align:center}.sig div{width:40%}</style></head><body><h2>BẢNG THUỐC CÁC KHOA PHÒNG CÒN ỨNG TỦ TRỰC</h2><p class="s">Từ ' + sdbDmy(D.from) + ' đến ' + sdbDmy(D.to) + (UNG.openAsof ? ' (đầu kỳ: bản chốt ' + sdbDmy(UNG.openAsof) + ')' : '') + ' · ' + lab + ' · ' + (byKhoa ? 'Theo khoa' : 'Theo thuốc') + '</p><table><thead>' + th + '</thead><tbody>' + body + '<tr class="g"><td colspan="' + (nc - 1) + '" class="n">TỔNG CỘNG</td><td class="n">' + ungF(total) + '</td></tr></tbody></table><div class="sig"><div><i>Ngày ' + dd + '</i><br><b>Người lập</b><br><br><br></div><div><br><b>Trưởng khoa Dược</b><br><br><br></div></div></body></html>';
+  if (!blocks) { alert('Không có thuốc nào còn ứng hoặc cần theo dõi để in.'); return; }
+  const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Ứng thuốc tủ trực</title><style>@page{size:A4 landscape;margin:10mm}*{box-sizing:border-box}body{font-family:"Times New Roman",serif;font-size:12.5px;color:#000}h2{text-align:center;font-size:17px;margin:0}p.s{text-align:center;margin:3px 0 10px}h3{font-size:14px;margin:12px 0 4px}h3 span{font-weight:normal;font-size:12px}table{width:100%;border-collapse:collapse;table-layout:fixed}thead{display:table-header-group}tr{page-break-inside:avoid}th,td{border:1px solid #000;padding:5px 6px;height:25px;overflow:hidden}th{background:#eee;height:auto}.c{text-align:center}.n{text-align:right}small{font-size:10.5px;color:#444}.w{margin:5px 0 0;border:1px dashed #000;padding:4px 8px;font-size:12px;page-break-inside:avoid}.w ul{margin:2px 0 0;padding-left:18px}.pb{page-break-before:always}</style></head><body><h2>BẢNG THEO DÕI THUỐC ỨNG TỦ TRỰC</h2><p class="s">Dữ liệu từ ' + sdbDmy(D.from) + ' đến ' + sdbDmy(D.to) + (UNG.openAsof ? ' (đầu kỳ: bản chốt ' + sdbDmy(UNG.openAsof) + ')' : '') + ' · chỉ in thuốc còn ứng &gt; 0</p>' + blocks + '</body></html>';
   mobilePrint(html, 'Ứng thuốc tủ trực');
 }
 </script>
