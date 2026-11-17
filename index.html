@@ -1347,7 +1347,7 @@ body{background:linear-gradient(180deg,#f3eeff,#faf8ff 40%,#fff)!important}
 #topbar .tb-logo{box-shadow:none!important}
 #topbar .tb-badge{background:rgba(255,255,255,.22)!important;color:#fff!important}
 #topbar .tb-zoom{background:rgba(255,255,255,.15)!important;border-radius:10px}#topbar .tb-zoom *{color:#fff!important}
-#home{background:transparent!important}
+#home{background:linear-gradient(180deg,#f3eeff,#faf8ff 40%,#fff)!important}
 #home .hm-wrap{max-width:1180px;padding:12px 14px 110px!important}
 .nx-hero{position:relative;border-radius:24px;padding:18px 18px 16px;color:#fff;background:var(--g2);box-shadow:0 14px 34px rgba(124,58,237,.35);overflow:hidden}
 .nx-hero:before{content:"";position:absolute;right:-50px;top:-60px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.12)}
@@ -1397,6 +1397,12 @@ body:not(.home-open) .content-area{padding-bottom:96px!important}
  #home .hm-g{grid-template-columns:repeat(4,minmax(0,1fr))!important}
  #topbar{margin:12px 14px 0;border-radius:20px}
 }
+
+#home .hm-d{display:none!important}
+#home .hm-t{min-height:64px!important;height:auto!important}
+#home .hm-x{gap:4px}
+#nx-prog,.nx-btns{display:none!important}
+.nx-row{grid-template-columns:1fr!important}
 </style>
 </head>
 <body>
@@ -7867,7 +7873,7 @@ function ung_printMa(nm) {
   const wrap=document.querySelector('#home .hm-wrap');
   if(wrap){
     const row=document.createElement('div');row.className='nx-row';
-    row.innerHTML='<div class="nx-hero"><span class="nx-chip">● Đang hoạt động</span><small id="nx-g"></small><div id="nx-t"></div><small id="nx-d"></small><div class="nx-btns"><button class="a" onclick="homeGo(0,0)">📋 Sổ Trả Vỏ</button><button class="b" onclick="homeGo(1,1)">📊 Thẻ kho</button></div></div><div id="nx-prog"><b>Nộp BB Seduxen</b><em>–</em><div><i style="width:0"></i></div></div>';
+    row.innerHTML='<div class="nx-hero"><span class="nx-chip">● Đang hoạt động</span><small id="nx-g"></small><div id="nx-t"></div><small id="nx-d"></small></div>';
     wrap.insertBefore(row,wrap.firstChild);
   }
   function tick(){const n=new Date(),h=n.getHours();
@@ -7875,7 +7881,7 @@ function ung_printMa(nm) {
     $('nx-t').textContent=p(h)+':'+p(n.getMinutes())+':'+p(n.getSeconds());
     $('nx-d').textContent=['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'][n.getDay()]+', '+p(n.getDate())+'/'+p(n.getMonth()+1)+'/'+n.getFullYear()+' · BV Đà Nẵng';}
   tick();setInterval(tick,1000);
-  function prog(){const el=$('nx-prog');if(!el||typeof SDB==='undefined')return;
+  function prog(){const el=$('nx-prog');if(!el)return;
     const r=Object.values(SDB.rows).filter(x=>x.month===SDB.month);
     if(!r.length){el.querySelector('em').textContent='Chưa có dữ liệu';return;}
     const d=r.filter(x=>x.nop).length,pc=Math.round(d*100/r.length);
